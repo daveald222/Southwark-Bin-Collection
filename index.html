@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Bins">
+    <meta name="theme-color" content="#1a1a2e">
+    <title>Bin Collection - 366 Ivydale Road</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.svg">
+    <link rel="icon" type="image/svg+xml" href="icon-192.svg">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 20px;
+            padding-top: env(safe-area-inset-top, 20px);
+            padding-bottom: env(safe-area-inset-bottom, 20px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .header .address {
+            font-size: 14px;
+            color: #8892b0;
+        }
+
+        .next-collection {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .next-collection .label {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .next-collection .date {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .next-collection .day-name {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        .next-collection .countdown {
+            margin-top: 12px;
+            font-size: 16px;
+            background: rgba(255,255,255,0.2);
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+        }
+
+        .bins-today {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        .bin-badge {
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .bin-badge.refuse { background: #4a5568; }
+        .bin-badge.recycling { background: #38a169; }
+        .bin-badge.food { background: #d69e2e; color: #1a1a2e; }
+
+        .schedule {
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .schedule h2 {
+            font-size: 18px;
+            margin-bottom: 16px;
+            color: #8892b0;
+        }
+
+        .collection-item {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+
+        .collection-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .collection-item .date-box {
+            text-align: center;
+            min-width: 60px;
+            margin-right: 16px;
+        }
+
+        .collection-item .date-box .day {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .collection-item .date-box .month {
+            font-size: 12px;
+            color: #8892b0;
+            text-transform: uppercase;
+        }
+
+        .collection-item .details {
+            flex: 1;
+        }
+
+        .collection-item .day-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .collection-item .bin-types {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .collection-item .bin-type {
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 8px;
+        }
+
+        .collection-item .bin-type.refuse { background: #4a5568; }
+        .collection-item .bin-type.recycling { background: #38a169; }
+        .collection-item .bin-type.food { background: #d69e2e; color: #1a1a2e; }
+
+        .settings-btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 12px;
+            color: #8892b0;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 12px;
+        }
+
+        .settings-btn:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .council-link {
+            display: block;
+            text-align: center;
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+            padding: 12px;
+        }
+
+        /* Settings Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 100;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: block;
+        }
+
+        .modal-content {
+            background: #1a1a2e;
+            border-radius: 20px;
+            padding: 24px;
+            max-width: 400px;
+            margin: 0 auto;
+            margin-top: 40px;
+        }
+
+        .modal h2 {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #8892b0;
+            font-size: 14px;
+        }
+
+        .form-group select,
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            background: #16213e;
+            color: #fff;
+            font-size: 16px;
+        }
+
+        .form-group input[type="date"] {
+            -webkit-appearance: none;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        .checkbox-label input {
+            width: 20px;
+            height: 20px;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 12px;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+
+        .setup-prompt {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .setup-prompt p {
+            color: #8892b0;
+            margin-bottom: 20px;
+        }
+
+        .info-box {
+            background: rgba(102, 126, 234, 0.2);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .info-box a {
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Bin Collection</h1>
+        <div class="address">366 Ivydale Road, SE15 3DG</div>
+    </div>
+
+    <div id="app">
+        <div id="main-view" style="display: none;">
+            <div class="next-collection" id="next-collection">
+                <!-- Populated by JS -->
+            </div>
+
+            <div class="schedule">
+                <h2>Upcoming Collections</h2>
+                <div id="upcoming-list">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <button class="settings-btn" onclick="openSettings()">
+                Edit Collection Schedule
+            </button>
+        </div>
+
+        <div id="setup-view" class="setup-prompt">
+            <div class="info-box">
+                Set up your bin collection schedule below. Check the
+                <a href="https://services.southwark.gov.uk/bins/lookup/200003386620" target="_blank">Southwark Council website</a>
+                for your exact collection days.
+            </div>
+            <button class="btn btn-primary" onclick="openSettings()">
+                Set Up Schedule
+            </button>
+        </div>
+    </div>
+
+    <a href="https://services.southwark.gov.uk/bins/lookup/200003386620" target="_blank" class="council-link">
+        View on Southwark Council website
+    </a>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <h2>Collection Schedule</h2>
+
+            <div class="info-box">
+                Enter the date of your next collection for each bin type. The app will automatically calculate all future dates.
+            </div>
+
+            <div class="form-group">
+                <label>Next Refuse (Black Bin) Collection</label>
+                <input type="date" id="refuse-date">
+            </div>
+
+            <div class="form-group">
+                <label>Refuse Collection Frequency</label>
+                <select id="refuse-frequency">
+                    <option value="7">Weekly</option>
+                    <option value="14" selected>Fortnightly</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Next Recycling (Green Bin) Collection</label>
+                <input type="date" id="recycling-date">
+            </div>
+
+            <div class="form-group">
+                <label>Recycling Collection Frequency</label>
+                <select id="recycling-frequency">
+                    <option value="7">Weekly</option>
+                    <option value="14" selected>Fortnightly</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Next Food Waste Collection</label>
+                <input type="date" id="food-date">
+            </div>
+
+            <div class="form-group">
+                <label>Food Waste Collection Frequency</label>
+                <select id="food-frequency">
+                    <option value="7" selected>Weekly</option>
+                    <option value="14">Fortnightly</option>
+                </select>
+            </div>
+
+            <div class="btn-row">
+                <button class="btn btn-secondary" onclick="closeSettings()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveSettings()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Storage keys
+        const STORAGE_KEY = 'binSchedule';
+
+        // Load saved schedule
+        function loadSchedule() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            return saved ? JSON.parse(saved) : null;
+        }
+
+        // Save schedule
+        function saveSchedule(schedule) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(schedule));
+        }
+
+        // Get next occurrence of a collection date
+        function getNextCollection(startDate, frequencyDays) {
+            const start = new Date(startDate);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            let next = new Date(start);
+            while (next < today) {
+                next.setDate(next.getDate() + frequencyDays);
+            }
+            return next;
+        }
+
+        // Get upcoming collections for a bin type
+        function getUpcomingCollections(startDate, frequencyDays, count = 8) {
+            const collections = [];
+            let current = getNextCollection(startDate, frequencyDays);
+
+            for (let i = 0; i < count; i++) {
+                collections.push(new Date(current));
+                current.setDate(current.getDate() + frequencyDays);
+            }
+            return collections;
+        }
+
+        // Format date
+        function formatDate(date) {
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+            return {
+                dayName: days[date.getDay()],
+                day: date.getDate(),
+                month: months[date.getMonth()],
+                full: `${date.getDate()} ${months[date.getMonth()]}`
+            };
+        }
+
+        // Get days until date
+        function getDaysUntil(date) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const target = new Date(date);
+            target.setHours(0, 0, 0, 0);
+            const diff = Math.ceil((target - today) / (1000 * 60 * 60 * 24));
+
+            if (diff === 0) return 'Today';
+            if (diff === 1) return 'Tomorrow';
+            return `In ${diff} days`;
+        }
+
+        // Merge and sort all collections
+        function getAllUpcomingCollections(schedule) {
+            const all = [];
+
+            if (schedule.refuse.date) {
+                getUpcomingCollections(schedule.refuse.date, schedule.refuse.frequency).forEach(date => {
+                    all.push({ date, type: 'refuse', label: 'Refuse' });
+                });
+            }
+
+            if (schedule.recycling.date) {
+                getUpcomingCollections(schedule.recycling.date, schedule.recycling.frequency).forEach(date => {
+                    all.push({ date, type: 'recycling', label: 'Recycling' });
+                });
+            }
+
+            if (schedule.food.date) {
+                getUpcomingCollections(schedule.food.date, schedule.food.frequency).forEach(date => {
+                    all.push({ date, type: 'food', label: 'Food Waste' });
+                });
+            }
+
+            // Sort by date
+            all.sort((a, b) => a.date - b.date);
+
+            // Group by date
+            const grouped = [];
+            all.forEach(item => {
+                const dateStr = item.date.toDateString();
+                const existing = grouped.find(g => g.date.toDateString() === dateStr);
+                if (existing) {
+                    existing.bins.push({ type: item.type, label: item.label });
+                } else {
+                    grouped.push({
+                        date: item.date,
+                        bins: [{ type: item.type, label: item.label }]
+                    });
+                }
+            });
+
+            return grouped;
+        }
+
+        // Render the app
+        function render() {
+            const schedule = loadSchedule();
+
+            if (!schedule) {
+                document.getElementById('main-view').style.display = 'none';
+                document.getElementById('setup-view').style.display = 'block';
+                return;
+            }
+
+            document.getElementById('main-view').style.display = 'block';
+            document.getElementById('setup-view').style.display = 'none';
+
+            const upcoming = getAllUpcomingCollections(schedule);
+
+            if (upcoming.length === 0) {
+                document.getElementById('main-view').style.display = 'none';
+                document.getElementById('setup-view').style.display = 'block';
+                return;
+            }
+
+            // Render next collection
+            const next = upcoming[0];
+            const nextFormatted = formatDate(next.date);
+            document.getElementById('next-collection').innerHTML = `
+                <div class="label">Next Collection</div>
+                <div class="date">${nextFormatted.full}</div>
+                <div class="day-name">${nextFormatted.dayName}</div>
+                <div class="countdown">${getDaysUntil(next.date)}</div>
+                <div class="bins-today">
+                    ${next.bins.map(b => `<span class="bin-badge ${b.type}">${b.label}</span>`).join('')}
+                </div>
+            `;
+
+            // Render upcoming list (skip the first one as it's shown above)
+            const upcomingHtml = upcoming.slice(1, 7).map(item => {
+                const formatted = formatDate(item.date);
+                return `
+                    <div class="collection-item">
+                        <div class="date-box">
+                            <div class="day">${formatted.day}</div>
+                            <div class="month">${formatted.month}</div>
+                        </div>
+                        <div class="details">
+                            <div class="day-name">${formatted.dayName}</div>
+                            <div class="bin-types">
+                                ${item.bins.map(b => `<span class="bin-type ${b.type}">${b.label}</span>`).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('upcoming-list').innerHTML = upcomingHtml;
+        }
+
+        // Open settings
+        function openSettings() {
+            const schedule = loadSchedule() || {
+                refuse: { date: '', frequency: 14 },
+                recycling: { date: '', frequency: 14 },
+                food: { date: '', frequency: 7 }
+            };
+
+            document.getElementById('refuse-date').value = schedule.refuse.date || '';
+            document.getElementById('refuse-frequency').value = schedule.refuse.frequency || 14;
+            document.getElementById('recycling-date').value = schedule.recycling.date || '';
+            document.getElementById('recycling-frequency').value = schedule.recycling.frequency || 14;
+            document.getElementById('food-date').value = schedule.food.date || '';
+            document.getElementById('food-frequency').value = schedule.food.frequency || 7;
+
+            document.getElementById('settings-modal').classList.add('active');
+        }
+
+        // Close settings
+        function closeSettings() {
+            document.getElementById('settings-modal').classList.remove('active');
+        }
+
+        // Save settings
+        function saveSettings() {
+            const schedule = {
+                refuse: {
+                    date: document.getElementById('refuse-date').value,
+                    frequency: parseInt(document.getElementById('refuse-frequency').value)
+                },
+                recycling: {
+                    date: document.getElementById('recycling-date').value,
+                    frequency: parseInt(document.getElementById('recycling-frequency').value)
+                },
+                food: {
+                    date: document.getElementById('food-date').value,
+                    frequency: parseInt(document.getElementById('food-frequency').value)
+                }
+            };
+
+            saveSchedule(schedule);
+            closeSettings();
+            render();
+        }
+
+        // Initialize
+        render();
+
+        // Register service worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js')
+                .then(reg => console.log('Service worker registered'))
+                .catch(err => console.log('Service worker registration failed:', err));
+        }
+    </script>
+</body>
+</html>
