@@ -1,9 +1,9 @@
-const CACHE_NAME = 'bin-collection-v1';
+const CACHE_NAME = 'bin-collection-v2';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icon-192.svg'
+  './',
+  './index.html',
+  './manifest.json',
+  './icon-192.svg'
 ];
 
 // Install service worker and cache resources
@@ -61,7 +61,7 @@ self.addEventListener('fetch', event => {
       .catch(() => {
         // Return cached index.html for navigation requests when offline
         if (event.request.mode === 'navigate') {
-          return caches.match('/index.html');
+          return caches.match('./index.html');
         }
       })
   );
